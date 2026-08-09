@@ -16,6 +16,7 @@ app.use(
 
 app.use(express.urlencoded({ extended: true })) // This is middleware that parses incoming request bodies
 
+
 // POST Methods
 
 // app.post("/signup", (req, res) => {
