@@ -36,7 +36,7 @@ app.post("/login", async (req, res) => {
   if (!email || !password){
     return res.status(400).send("All fields required!")
   }
-  const result = await pool.query("SELECT * FROM users WHERE email = $1", [email])
+  const result = await pool.query("SELECT * FROM users WHERE email = $1", [email.toLowerCase()])
   const user = result.rows[0]
   if (!user) {
     return res.send("Invalid email or password")
@@ -60,7 +60,7 @@ app.post("/signup", async (req, res) => {
     const hashPass = await bcrypt.hash(password, 10)
     const result = await pool.query(
       "INSERT INTO users (email, password) VALUES ($1, $2) RETURNING *",
-      [email, hashPass]
+      [email.toLowerCase(), hashPass]
     )
 
     console.log(`New User Created => Email: ${email}, Password: ${password}`)
@@ -77,6 +77,20 @@ app.post("/signup", async (req, res) => {
   }
 })
 
+app.post("/reviews", requireAuth, async (req, res) => {
+  const { content } = req.body
+  const {userId } = req.session
+
+  if (!content) {
+    return res.send("Please write a review before you submit.")
+  }
+
+  await pool.query("INSERT INTO reviews (content, user_id) VALUES ($1, $2)", [content, userId])
+  res.redirect("/success")
+  // const result = await pool.query("INSERT INTO reviews (content, user_id) VALUES ($1, $2)", [content, userId])
+  // res.send(result.rows[0])
+})
+
 // GET Methods
 
 app.get("/", (req, res) => {
@@ -89,6 +103,9 @@ app.get("/login", (req, res) => {
 
 app.get("/signup", (req, res) => {
   res.sendFile(__dirname + "/views/signup.html")
+})
+app.get("/success", (req, res) => {
+  res.sendFile(__dirname + "/views/success.html")
 })
 app.get("/dashboard", requireAuth, (req, res) => {
   res.sendFile(__dirname + "/views/dashboard.html")
