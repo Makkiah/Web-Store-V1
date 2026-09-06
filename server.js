@@ -86,9 +86,8 @@ app.post("/reviews", requireAuth, async (req, res) => {
   }
 
   await pool.query("INSERT INTO reviews (content, user_id) VALUES ($1, $2)", [content, userId])
-  res.redirect("/success")
-  // const result = await pool.query("INSERT INTO reviews (content, user_id) VALUES ($1, $2)", [content, userId])
-  // res.send(result.rows[0])
+  // res.redirect("/success")
+  res.send(`<h1>Review Submitted!</h1><p>Your review: ${content}</p><a href="/dashboard">Back to Dashboard</a>`)
 })
 
 // GET Methods
