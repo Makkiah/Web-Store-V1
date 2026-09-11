@@ -86,8 +86,8 @@ app.post("/reviews", requireAuth, async (req, res) => {
   }
 
   await pool.query("INSERT INTO reviews (content, user_id) VALUES ($1, $2)", [content, userId])
-  // res.redirect("/success")
-  res.send(`<h1>Review Submitted!</h1><p>Your review: ${content}</p><a href="/dashboard">Back to Dashboard</a>`)
+  res.redirect("/reviews")
+  //res.send(`<h1>Review Submitted!</h1><p>Your review: ${content}</p><a href="/dashboard">Back to Dashboard</a>`)
 })
 
 // GET Methods
@@ -121,6 +121,25 @@ app.get("/user/:email", requireAuth, async (req, res) => {
 })
 app.get("/logout", (req, res) => {
   req.session.destroy(() => res.redirect("/login"))
+})
+
+app.get("/reviews", async (req, res) => {
+  const result = await pool.query(`
+    SELECT reviews.content, users.email
+    FROM reviews
+    JOIN users
+    ON reviews.user_id = users.id  
+  `)
+
+  const reviewHtml = result.rows.map((review) => {
+    return `
+      <div>
+        <h3>${review.email}</h3>
+        <p>${review.content}</p>
+      </div>`
+  }).join("")
+
+  res.send(reviewHtml)
 })
 
 // Listen
